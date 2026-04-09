@@ -26,7 +26,16 @@ class SubjectController
     {
         try {
             $subjects = $this->subjectRepository->findAll();
-            $response = new ResponseJson(200, $subjects);
+            $data = [];
+            foreach ($subjects as $subject) {
+                $data[] = [
+                    'id' => $subject->id()->value(),
+                    'name' => $subject->name(),
+                    'courseId' => $subject->courseId()->value()
+                ];
+            }
+
+            $response = new ResponseJson(200, $data);
             $response->send();
         } catch (Exception $e) {
             $response = new ResponseJson(500, ['error' => $e->getMessage()]);
@@ -98,11 +107,15 @@ class SubjectController
                 $response->send();
                 return;
             }
+            if (!isset($body['name'])) {
+                $response = new ResponseJson(400, ['error' => 'Missing name for update']);
+                $response->send();
+                return;
+            }
 
-            // For update, would need setter method in Subject entity
-            
+            $subject->setName($body['name']);
             $this->subjectRepository->save($subject);
-            
+
             $response = new ResponseJson(200, [
                 'id' => $subject->id()->value(),
                 'name' => $subject->name(),
@@ -126,6 +139,8 @@ class SubjectController
                 $response->send();
                 return;
             }
+
+            $this->subjectRepository->delete($subject);
 
             $response = new ResponseJson(204, []);
             $response->send();

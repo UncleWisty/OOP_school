@@ -27,4 +27,10 @@ final class DoctrineSubjectRepository
         $this->em->persist($subject);
         $this->em->flush();
     }
+
+    public function delete(Subject $subject): void
+    {
+        $this->em->remove($subject);
+        $this->em->flush();
+    }
 }

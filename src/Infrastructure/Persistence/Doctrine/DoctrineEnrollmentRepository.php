@@ -27,4 +27,10 @@ final class DoctrineEnrollmentRepository
         $this->em->persist($enrollment);
         $this->em->flush();
     }
+
+    public function delete(Enrollment $enrollment): void
+    {
+        $this->em->remove($enrollment);
+        $this->em->flush();
+    }
 }

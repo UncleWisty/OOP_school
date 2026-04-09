@@ -27,4 +27,10 @@ final class DoctrineTeacherRepository
         $this->em->persist($teacher);
         $this->em->flush();
     }
+
+    public function delete(Teacher $teacher): void
+    {
+        $this->em->remove($teacher);
+        $this->em->flush();
+    }
 }

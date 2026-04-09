@@ -27,4 +27,10 @@ final class DoctrineCourseRepository
         $this->em->persist($course);
         $this->em->flush();
     }
+
+    public function delete(Course $course): void
+    {
+        $this->em->remove($course);
+        $this->em->flush();
+    }
 }

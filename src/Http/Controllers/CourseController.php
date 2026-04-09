@@ -25,7 +25,14 @@ class CourseController
     {
         try {
             $courses = $this->courseRepository->findAll();
-            $response = new ResponseJson(200, $courses);
+            $data = [];
+            foreach ($courses as $course) {
+                $data[] = [
+                    'id' => $course->id()->value(),
+                    'name' => $course->name()
+                ];
+            }
+            $response = new ResponseJson(200, $data);
             $response->send();
         } catch (Exception $e) {
             $response = new ResponseJson(500, ['error' => $e->getMessage()]);
@@ -94,9 +101,13 @@ class CourseController
                 $response->send();
                 return;
             }
+            if (!isset($body['name'])) {
+                $response = new ResponseJson(400, ['error' => 'Missing name for update']);
+                $response->send();
+                return;
+            }
 
-            // For update, would need setter method in Course entity
-            
+            $course->setName($body['name']);
             $this->courseRepository->save($course);
             
             $response = new ResponseJson(200, [
@@ -121,6 +132,8 @@ class CourseController
                 $response->send();
                 return;
             }
+
+            $this->courseRepository->delete($course);
 
             $response = new ResponseJson(204, []);
             $response->send();

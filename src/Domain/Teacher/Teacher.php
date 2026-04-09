@@ -67,4 +67,9 @@ final class Teacher
         
         return false;
     }
+
+    public function setName(string $name): void
+    {
+        $this->name = $name;
+    }
 }

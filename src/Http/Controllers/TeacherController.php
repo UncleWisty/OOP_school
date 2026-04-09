@@ -25,7 +25,21 @@ class TeacherController
     {
         try {
             $teachers = $this->teacherRepository->findAll();
-            $response = new ResponseJson(200, $teachers);
+            $data = [];
+            foreach ($teachers as $teacher) {
+                $subjects = [];
+                foreach ($teacher->subjects() as $s) {
+                    $subjects[] = $s instanceof \App\Domain\Subject\SubjectId ? $s->value() : $s;
+                }
+
+                $data[] = [
+                    'id' => $teacher->id()->value(),
+                    'name' => $teacher->name(),
+                    'subjects' => $subjects
+                ];
+            }
+
+            $response = new ResponseJson(200, $data);
             $response->send();
         } catch (Exception $e) {
             $response = new ResponseJson(500, ['error' => $e->getMessage()]);
@@ -95,15 +109,24 @@ class TeacherController
                 $response->send();
                 return;
             }
+            if (!isset($body['name'])) {
+                $response = new ResponseJson(400, ['error' => 'Missing name for update']);
+                $response->send();
+                return;
+            }
 
-            // For update, would need setter method in Teacher entity
-            
+            $teacher->setName($body['name']);
             $this->teacherRepository->save($teacher);
-            
+
+            $subjects = [];
+            foreach ($teacher->subjects() as $s) {
+                $subjects[] = $s instanceof \App\Domain\Subject\SubjectId ? $s->value() : $s;
+            }
+
             $response = new ResponseJson(200, [
                 'id' => $teacher->id()->value(),
                 'name' => $teacher->name(),
-                'subjects' => $teacher->subjects()
+                'subjects' => $subjects
             ]);
             $response->send();
         } catch (Exception $e) {
@@ -123,6 +146,8 @@ class TeacherController
                 $response->send();
                 return;
             }
+
+            $this->teacherRepository->delete($teacher);
 
             $response = new ResponseJson(204, []);
             $response->send();

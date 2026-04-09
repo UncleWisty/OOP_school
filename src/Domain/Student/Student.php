@@ -58,6 +58,11 @@ final class Student
         $this->enrollments[] = $enrollment;
     }
 
+    public function setEmail(Email $email): void
+    {
+        $this->email = $email->value();
+    }
+
     private function ensureNoDuplicateEnrollment(AcademicYear $year): void
     {
         foreach ($this->enrollments as $existing) {

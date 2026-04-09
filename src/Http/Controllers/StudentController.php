@@ -26,7 +26,26 @@ class StudentController
     {
         try {
             $students = $this->studentRepository->findAll();
-            $response = new ResponseJson(200, $students);
+            $data = [];
+            foreach ($students as $student) {
+                $enrollments = [];
+                foreach ($student->enrollments() as $en) {
+                    $enrollments[] = [
+                        'id' => $en->id()->value(),
+                        'academicYear' => $en->academicYear()->value(),
+                        'isFullCourse' => $en->isFullCourse(),
+                        'courseId' => $en->isFullCourse() ? $en->courseId()->value() : null,
+                        'subjectIds' => $en->subjectIds()
+                    ];
+                }
+
+                $data[] = [
+                    'id' => $student->id()->value(),
+                    'email' => $student->email()->value(),
+                    'enrollments' => $enrollments
+                ];
+            }
+            $response = new ResponseJson(200, $data);
             $response->send();
         } catch (Exception $e) {
             $response = new ResponseJson(500, ['error' => $e->getMessage()]);
@@ -45,11 +64,21 @@ class StudentController
                 $response->send();
                 return;
             }
-            
+            $enrollments = [];
+            foreach ($student->enrollments() as $en) {
+                $enrollments[] = [
+                    'id' => $en->id()->value(),
+                    'academicYear' => $en->academicYear()->value(),
+                    'isFullCourse' => $en->isFullCourse(),
+                    'courseId' => $en->isFullCourse() ? $en->courseId()->value() : null,
+                    'subjectIds' => $en->subjectIds()
+                ];
+            }
+
             $response = new ResponseJson(200, [
                 'id' => $student->id()->value(),
                 'email' => $student->email()->value(),
-                'enrollments' => $student->enrollments()
+                'enrollments' => $enrollments
             ]);
             $response->send();
         } catch (Exception $e) {
@@ -102,7 +131,7 @@ class StudentController
             // For now, we can update email if provided
             if (isset($body['email'])) {
                 $email = new Email($body['email']);
-                // We would need a setter method in Student entity
+                $student->setEmail($email);
             }
             
             $this->studentRepository->save($student);
@@ -130,7 +159,8 @@ class StudentController
                 return;
             }
 
-            // Doctrine remove
+            $this->studentRepository->delete($student);
+
             $response = new ResponseJson(204, []);
             $response->send();
         } catch (Exception $e) {

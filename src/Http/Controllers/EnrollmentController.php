@@ -28,7 +28,24 @@ class EnrollmentController
     {
         try {
             $enrollments = $this->enrollmentRepository->findAll();
-            $response = new ResponseJson(200, $enrollments);
+            $data = [];
+            foreach ($enrollments as $enrollment) {
+                $item = [
+                    'id' => $enrollment->id()->value(),
+                    'academicYear' => $enrollment->academicYear()->value(),
+                    'isFullCourse' => $enrollment->isFullCourse()
+                ];
+
+                if ($enrollment->isFullCourse()) {
+                    $item['courseId'] = $enrollment->courseId()->value();
+                } else {
+                    $item['subjectIds'] = $enrollment->subjectIds();
+                }
+
+                $data[] = $item;
+            }
+
+            $response = new ResponseJson(200, $data);
             $response->send();
         } catch (Exception $e) {
             $response = new ResponseJson(500, ['error' => $e->getMessage()]);
@@ -150,6 +167,8 @@ class EnrollmentController
                 $response->send();
                 return;
             }
+
+            $this->enrollmentRepository->delete($enrollment);
 
             $response = new ResponseJson(204, []);
             $response->send();

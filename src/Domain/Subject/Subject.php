@@ -48,4 +48,9 @@ final class Subject
     {
         return new CourseId($this->courseId);
     }
+
+    public function setName(string $name): void
+    {
+        $this->name = $name;
+    }
 }
