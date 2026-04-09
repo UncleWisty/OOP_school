@@ -1,0 +1,7 @@
+#!/usr/bin/env php
+<?php
+
+// Lightweight wrapper to match README: `php bin/doctrine ...`
+// It just includes the main `doctrine.php` script.
+
+require_once __DIR__ . '/doctrine.php';

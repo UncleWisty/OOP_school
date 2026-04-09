@@ -6,19 +6,36 @@ namespace App\Domain\Teacher;
 
 use App\Domain\Subject\SubjectId;
 use App\Domain\Shared\DomainException;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\Table;
+use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\Column;
 
+#[Entity]
+#[Table(name: 'teachers')]
 final class Teacher
 {
+    #[Id]
+    #[Column(type: 'string', length: 36)]
+    private string $id;
+
+    #[Column(type: 'string')]
+    private string $name;
+
+    #[Column(type: 'json')]
     private array $subjects = [];
 
     public function __construct(
-        private TeacherId $id,
-        private string $name
-    ) {}
+        TeacherId $id,
+        string $name
+    ) {
+        $this->id = $id->value();
+        $this->name = $name;
+    }
 
     public function id(): TeacherId
     {
-        return $this->id;
+        return new TeacherId($this->id);
     }
 
     public function name(): string

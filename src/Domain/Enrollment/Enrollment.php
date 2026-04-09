@@ -7,15 +7,39 @@ namespace App\Domain\Enrollment;
 use App\Domain\Course\CourseId;
 use App\Domain\Subject\SubjectId;
 use App\Domain\Shared\DomainException;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\Table;
+use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\Column;
 
+#[Entity]
+#[Table(name: 'enrollments')]
 final class Enrollment
 {
+    #[Id]
+    #[Column(type: 'string', length: 36)]
+    private string $id;
+
+    #[Column(type: 'string')]
+    private string $academicYear;
+
+    #[Column(type: 'string', length: 36, nullable: true)]
+    private ?string $courseId = null;
+
+    #[Column(type: 'json')]
+    private array $subjectIds = [];
+
     private function __construct(
-        private EnrollmentId $id,
-        private AcademicYear $academicYear,
-        private ?CourseId $courseId = null,
-        private array $subjectIds = []
-    ) {}
+        EnrollmentId $id,
+        AcademicYear $academicYear,
+        ?CourseId $courseId = null,
+        array $subjectIds = []
+    ) {
+        $this->id = $id->value();
+        $this->academicYear = $academicYear->value();
+        $this->courseId = $courseId ? $courseId->value() : null;
+        $this->subjectIds = $subjectIds;
+    }
 
     public static function enrollFullCourse(
         EnrollmentId $id,
@@ -45,12 +69,13 @@ final class Enrollment
 
     public function id(): EnrollmentId
     {
-        return $this->id;
+        return new EnrollmentId($this->id);
     }
 
     public function academicYear(): AcademicYear
     {
-        return $this->academicYear;
+        $parts = explode('/', $this->academicYear);
+        return new AcademicYear((int)$parts[0], (int)$parts[1]);
     }
 
     public function isFullCourse(): bool
@@ -60,7 +85,7 @@ final class Enrollment
 
     public function courseId(): ?CourseId
     {
-        return $this->courseId;
+        return $this->courseId ? new CourseId($this->courseId) : null;
     }
 
     public function subjectIds(): array
