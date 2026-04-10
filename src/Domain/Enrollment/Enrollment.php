@@ -6,6 +6,7 @@ namespace App\Domain\Enrollment;
 
 use App\Domain\Course\CourseId;
 use App\Domain\Subject\SubjectId;
+use App\Domain\Student\StudentId;
 use App\Domain\Shared\DomainException;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Table;
@@ -23,6 +24,9 @@ final class Enrollment
     #[Column(type: 'string')]
     private string $academicYear;
 
+    #[Column(type: 'string', length: 36)]
+    private string $studentId;
+
     #[Column(type: 'string', length: 36, nullable: true)]
     private ?string $courseId = null;
 
@@ -31,11 +35,13 @@ final class Enrollment
 
     private function __construct(
         EnrollmentId $id,
+        StudentId $studentId,
         AcademicYear $academicYear,
         ?CourseId $courseId = null,
         array $subjectIds = []
     ) {
         $this->id = $id->value();
+        $this->studentId = $studentId->value();
         $this->academicYear = $academicYear->value();
         $this->courseId = $courseId ? $courseId->value() : null;
         $this->subjectIds = $subjectIds;
@@ -44,15 +50,17 @@ final class Enrollment
     public static function enrollFullCourse(
         EnrollmentId $id,
         AcademicYear $academicYear,
-        CourseId $courseId
+        CourseId $courseId,
+        StudentId $studentId
     ): self {
-        return new self($id, $academicYear, $courseId);
+        return new self($id, $studentId, $academicYear, $courseId);
     }
 
     public static function enrollPartial(
         EnrollmentId $id,
         AcademicYear $academicYear,
-        array $subjectIds
+        array $subjectIds,
+        StudentId $studentId
     ): self {
         if (empty($subjectIds)) {
             throw new DomainException('Partial enrollment must have at least one subject');
@@ -64,7 +72,7 @@ final class Enrollment
             }
         }
 
-        return new self($id, $academicYear, null, $subjectIds);
+        return new self($id, $studentId, $academicYear, null, $subjectIds);
     }
 
     public function id(): EnrollmentId
@@ -91,5 +99,10 @@ final class Enrollment
     public function subjectIds(): array
     {
         return $this->subjectIds;
+    }
+
+    public function studentId(): StudentId
+    {
+        return new StudentId($this->studentId);
     }
 }

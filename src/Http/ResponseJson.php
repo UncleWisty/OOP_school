@@ -17,6 +17,12 @@ class ResponseJson
     public function send()
     {
         http_response_code($this->statusCode);
+
+        // For 204 No Content, do not send a body or content-type header
+        if ($this->statusCode === 204) {
+            return;
+        }
+
         header("$this->header");
         echo $this->body;
     }

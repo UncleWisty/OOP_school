@@ -7,6 +7,7 @@ use App\Domain\Enrollment\Enrollment;
 use App\Domain\Enrollment\AcademicYear;
 use App\Domain\Course\CourseId;
 use App\Domain\Subject\SubjectId;
+use App\Domain\Student\StudentId;
 use App\Http\Request;
 use App\Http\ResponseJson;
 use App\Infrastructure\Persistence\Doctrine\DoctrineEnrollmentRepository;
@@ -32,6 +33,7 @@ class EnrollmentController
             foreach ($enrollments as $enrollment) {
                 $item = [
                     'id' => $enrollment->id()->value(),
+                    'studentId' => $enrollment->studentId()->value(),
                     'academicYear' => $enrollment->academicYear()->value(),
                     'isFullCourse' => $enrollment->isFullCourse()
                 ];
@@ -67,6 +69,7 @@ class EnrollmentController
             
             $data = [
                 'id' => $enrollment->id()->value(),
+                'studentId' => $enrollment->studentId()->value(),
                 'academicYear' => $enrollment->academicYear()->value(),
                 'isFullCourse' => $enrollment->isFullCourse(),
             ];
@@ -90,7 +93,7 @@ class EnrollmentController
         try {
             $body = $this->request->getBody();
             
-            if (!isset($body['id'], $body['academicYear'], $body['academicYearEnd'])) {
+            if (!isset($body['id'], $body['academicYear'], $body['academicYearEnd'], $body['studentId'])) {
                 $response = new ResponseJson(400, ['error' => 'Missing required fields']);
                 $response->send();
                 return;
@@ -98,15 +101,16 @@ class EnrollmentController
 
             $enrollmentId = new EnrollmentId($body['id']);
             $academicYear = new AcademicYear($body['academicYear'], $body['academicYearEnd']);
+            $studentId = new StudentId($body['studentId']);
             
             if (isset($body['courseId'])) {
                 // Full course enrollment
                 $courseId = new CourseId($body['courseId']);
-                $enrollment = Enrollment::enrollFullCourse($enrollmentId, $academicYear, $courseId);
+                $enrollment = Enrollment::enrollFullCourse($enrollmentId, $academicYear, $courseId, $studentId);
             } elseif (isset($body['subjectIds']) && is_array($body['subjectIds'])) {
                 // Partial enrollment
                 $subjectIds = array_map(fn($id) => new SubjectId($id), $body['subjectIds']);
-                $enrollment = Enrollment::enrollPartial($enrollmentId, $academicYear, $subjectIds);
+                $enrollment = Enrollment::enrollPartial($enrollmentId, $academicYear, $subjectIds, $studentId);
             } else {
                 $response = new ResponseJson(400, ['error' => 'Either courseId or subjectIds must be provided']);
                 $response->send();
@@ -117,6 +121,7 @@ class EnrollmentController
             
             $data = [
                 'id' => $enrollment->id()->value(),
+                'studentId' => $enrollment->studentId()->value(),
                 'academicYear' => $enrollment->academicYear()->value(),
                 'isFullCourse' => $enrollment->isFullCourse(),
             ];

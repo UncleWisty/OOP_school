@@ -83,6 +83,13 @@ class TeacherController
             }
 
             $teacherId = new TeacherId($body['id']);
+            // Prevent creating a teacher with an ID that already exists
+            $existing = $this->teacherRepository->find($teacherId);
+            if ($existing) {
+                $response = new ResponseJson(409, ['error' => 'Teacher with this id already exists']);
+                $response->send();
+                return;
+            }
             $teacher = new Teacher($teacherId, $body['name']);
             $this->teacherRepository->save($teacher);
             
@@ -149,6 +156,7 @@ class TeacherController
 
             $this->teacherRepository->delete($teacher);
 
+            // No content for successful delete
             $response = new ResponseJson(204, []);
             $response->send();
         } catch (Exception $e) {

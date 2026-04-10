@@ -9,6 +9,7 @@ use App\Domain\Enrollment\Enrollment;
 use App\Domain\Enrollment\EnrollmentId;
 use App\Domain\Enrollment\AcademicYear;
 use App\Domain\Subject\SubjectId;
+use App\Domain\Student\StudentId;
 use App\Domain\Shared\DomainException;
 
 final class EnrollmentTest extends TestCase
@@ -18,7 +19,8 @@ final class EnrollmentTest extends TestCase
         $enrollment = Enrollment::enrollPartial(
             new EnrollmentId('enr-1'),
             new AcademicYear(2024, 2025),
-            [new SubjectId('sub-1')]
+            [new SubjectId('sub-1')],
+            new StudentId('std-1')
         );
 
         $this->assertCount(1, $enrollment->subjectIds());
@@ -32,7 +34,8 @@ final class EnrollmentTest extends TestCase
         Enrollment::enrollPartial(
             new EnrollmentId('enr-1'),
             new AcademicYear(2024, 2025),
-            []
+            [],
+            new StudentId('std-1')
         );
     }
 
@@ -41,7 +44,8 @@ final class EnrollmentTest extends TestCase
         $enrollment = Enrollment::enrollFullCourse(
             new EnrollmentId('enr-2'),
             new AcademicYear(2024, 2025),
-            new \App\Domain\Course\CourseId('crs-1')
+            new \App\Domain\Course\CourseId('crs-1'),
+            new StudentId('std-1')
         );
 
         $this->assertTrue($enrollment->isFullCourse());
@@ -57,7 +61,8 @@ final class EnrollmentTest extends TestCase
         Enrollment::enrollPartial(
             new EnrollmentId('enr-3'),
             new AcademicYear(2024, 2025),
-            ['not-a-subject']
+            ['not-a-subject'],
+            new StudentId('std-1')
         );
     }
 
@@ -66,7 +71,8 @@ final class EnrollmentTest extends TestCase
         $enrollment = Enrollment::enrollPartial(
             new EnrollmentId('enr-4'),
             new AcademicYear(2024, 2025),
-            [new SubjectId('sub-1'), new SubjectId('sub-1')]
+            [new SubjectId('sub-1'), new SubjectId('sub-1')],
+            new StudentId('std-1')
         );
 
         $this->assertCount(2, $enrollment->subjectIds());

@@ -22,7 +22,8 @@ final class StudentTest extends TestCase
         $enrollment = Enrollment::enrollFullCourse(
             new EnrollmentId('enr-1'),
             new AcademicYear(2024, 2025),
-            new CourseId('crs-1')
+            new CourseId('crs-1'),
+            new StudentId('std-1')
         );
 
         $student->enroll($enrollment);
@@ -35,10 +36,10 @@ final class StudentTest extends TestCase
         $student = new Student(new StudentId('std-1'), new Email('a@a.com'));
         $year = new AcademicYear(2024, 2025);
         
-        $student->enroll(Enrollment::enrollFullCourse(new EnrollmentId('enr-1'), $year, new CourseId('crs-1')));
+    $student->enroll(Enrollment::enrollFullCourse(new EnrollmentId('enr-1'), $year, new CourseId('crs-1'), new StudentId('std-1')));
 
-        $this->expectException(DomainException::class);
-        $student->enroll(Enrollment::enrollFullCourse(new EnrollmentId('enr-2'), $year, new CourseId('crs-2')));
+    $this->expectException(DomainException::class);
+    $student->enroll(Enrollment::enrollFullCourse(new EnrollmentId('enr-2'), $year, new CourseId('crs-2'), new StudentId('std-1')));
     }
 
     public function test_getters_return_expected_values(): void
@@ -55,8 +56,8 @@ final class StudentTest extends TestCase
     {
         $student = new Student(new StudentId('std-1'), new Email('a@a.com'));
 
-        $student->enroll(Enrollment::enrollFullCourse(new EnrollmentId('enr-1'), new AcademicYear(2023, 2024), new CourseId('crs-1')));
-        $student->enroll(Enrollment::enrollFullCourse(new EnrollmentId('enr-2'), new AcademicYear(2024, 2025), new CourseId('crs-2')));
+    $student->enroll(Enrollment::enrollFullCourse(new EnrollmentId('enr-1'), new AcademicYear(2023, 2024), new CourseId('crs-1'), new StudentId('std-1')));
+    $student->enroll(Enrollment::enrollFullCourse(new EnrollmentId('enr-2'), new AcademicYear(2024, 2025), new CourseId('crs-2'), new StudentId('std-1')));
 
         $this->assertCount(2, $student->enrollments());
         $this->assertInstanceOf(Enrollment::class, $student->enrollments()[0]);
