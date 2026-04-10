@@ -72,7 +72,10 @@ final class Enrollment
             }
         }
 
-        return new self($id, $studentId, $academicYear, null, $subjectIds);
+        // Convert SubjectId objects to plain string ids for storage
+        $subjectIdValues = array_map(fn(SubjectId $s) => $s->value(), $subjectIds);
+
+        return new self($id, $studentId, $academicYear, null, $subjectIdValues);
     }
 
     public function id(): EnrollmentId

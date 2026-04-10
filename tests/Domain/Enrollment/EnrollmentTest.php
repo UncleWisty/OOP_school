@@ -75,8 +75,8 @@ final class EnrollmentTest extends TestCase
             new StudentId('std-1')
         );
 
-        $this->assertCount(2, $enrollment->subjectIds());
-        $this->assertSame('sub-1', $enrollment->subjectIds()[0]->value());
-        $this->assertSame('sub-1', $enrollment->subjectIds()[1]->value());
+    $this->assertCount(2, $enrollment->subjectIds());
+    $this->assertSame('sub-1', $enrollment->subjectIds()[0]);
+    $this->assertSame('sub-1', $enrollment->subjectIds()[1]);
     }
 }
