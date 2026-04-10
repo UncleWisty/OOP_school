@@ -8,6 +8,7 @@ use App\Domain\Course\CourseId;
 use App\Http\Request;
 use App\Http\ResponseJson;
 use App\Infrastructure\Persistence\Doctrine\DoctrineSubjectRepository;
+use App\Infrastructure\Persistence\Doctrine\DoctrineCourseRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
@@ -15,11 +16,13 @@ class SubjectController
 {
     protected Request $request;
     protected DoctrineSubjectRepository $subjectRepository;
+    protected DoctrineCourseRepository $courseRepository;
 
     public function __construct(Request $request, EntityManagerInterface $em)
     {
         $this->request = $request;
         $this->subjectRepository = new DoctrineSubjectRepository($em);
+        $this->courseRepository = new DoctrineCourseRepository($em);
     }
 
     public function index()
@@ -80,6 +83,15 @@ class SubjectController
 
             $subjectId = new SubjectId($body['id']);
             $courseId = new CourseId($body['courseId']);
+
+            // para verificar que existe el curso antes de insertarla!!!
+            $course = $this->courseRepository->find($courseId);
+            if (!$course) {
+                $response = new ResponseJson(404, ['error' => 'Course not found']);
+                $response->send();
+                return;
+            }
+
             $subject = new Subject($subjectId, $body['name'], $courseId);
             $this->subjectRepository->save($subject);
             
